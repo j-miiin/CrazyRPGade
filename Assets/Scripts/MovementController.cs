@@ -8,6 +8,7 @@ public class MovementController : MonoBehaviour
     public AnimatedSpriteRenderer srDown;
     public AnimatedSpriteRenderer srLeft;
     public AnimatedSpriteRenderer srRight;
+    public AnimatedSpriteRenderer srDeath;
 
     public float speed = 5f;
 
@@ -23,6 +24,7 @@ public class MovementController : MonoBehaviour
     {
         rb = GetComponent<Rigidbody2D>();
         activeSr = srDown;
+        srDeath.enabled = false;
     }
 
     private void Update()
@@ -64,5 +66,33 @@ public class MovementController : MonoBehaviour
 
         activeSr = sr;
         activeSr.idle = direction == Vector2.zero;
+    }
+
+    private void OnTriggerEnter2D(Collider2D collision)
+    {
+        if (collision.gameObject.layer == LayerMask.NameToLayer("Explosion"))
+        {
+            DeathSequence();
+        }
+    }
+
+    private void DeathSequence()
+    {
+        enabled = false;
+        GetComponent<BombController>().enabled = false;
+
+        srUp.enabled = false;
+        srDown.enabled = false;
+        srLeft.enabled = false;
+        srRight.enabled = false;
+        srDeath.enabled = true;
+
+        Invoke(nameof(OnDeathSequenceEnded), 1.25f);
+    }
+
+    private void OnDeathSequenceEnded()
+    {
+        gameObject.SetActive(false);
+        FindAnyObjectByType<GameManager>().CheckWinState();
     }
 }
